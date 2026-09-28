@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你的拉麵店｜官方網站</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#fff8ef;color:#2b2118}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 7%;background:#fff;position:sticky;top:0;border-bottom:1px solid #eadfd2;z-index:2}
+.logo{font-weight:900;font-size:22px}.navlinks{display:flex;gap:10px}.navlinks a{color:inherit;text-decoration:none;padding:9px 14px;border-radius:10px}.navlinks a:hover{background:#fff0dc}
+.hero{padding:80px 7% 65px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;max-width:1150px;margin:auto}
+.badge{display:inline-block;background:#ffe2b8;padding:7px 12px;border-radius:999px;font-weight:700}
+h1{font-size:clamp(42px,7vw,76px);line-height:1;margin:18px 0 20px}
+.hero p{font-size:18px;line-height:1.7;color:#6f6257}
+.buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+.btn{display:inline-block;text-decoration:none;border-radius:13px;padding:13px 20px;font-weight:800;border:1px solid #d9c9b8;color:#2b2118;background:#fff}
+.btn.primary{background:#e87535;color:#fff;border-color:#e87535}
+.ramen{font-size:170px;text-align:center;filter:drop-shadow(0 15px 18px #8b5a2b25)}
+section{padding:65px 7%;max-width:1150px;margin:auto}
+h2{font-size:34px;margin-top:0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:#fff;border:1px solid #eadfd2;border-radius:18px;padding:22px}
+.card .icon{font-size:40px}.card p{color:#75695e;line-height:1.6}
+.download{background:#fff;border:1px solid #eadfd2;border-radius:22px;padding:28px;display:flex;justify-content:space-between;gap:20px;align-items:center}
+footer{text-align:center;padding:35px;color:#8b7d70}
+@media(max-width:700px){.hero{grid-template-columns:1fr;padding-top:55px}.ramen{font-size:120px}.cards{grid-template-columns:1fr}.download{flex-direction:column;align-items:flex-start}.navlinks a{padding:8px}.logo{font-size:18px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">🍜 你的拉麵店</div>
+  <div class="navlinks">
+    <a href="#game">遊戲</a>
+  </div>
+</nav>
+
+<main>
+<section class="hero" id="game">
+  <div>
+    <span class="badge">解壓 × 收集 × 拉麵</span>
+    <h1>你的拉麵店</h1>
+    <p>接住從天而降的食材，完成客人的訂單，賺取金幣並升級技能！達到 Lv.3 後，還會解鎖第二章的新食材！</p>
+    <div class="buttons">
+      <a class="btn primary" href="game.html">🎮 開始遊戲</a>
+    </div>
+  </div>
+  <div class="ramen" aria-label="拉麵">🍜</div>
+</section>
+
+<section>
+  <h2>🎮 遊戲玩法</h2>
+  <div class="cards">
+    <article class="card"><div class="icon">🥕</div><h3>收集食材</h3><p>食材會不斷掉落，點擊它們，把需要的材料收進碗裡。</p></article>
+    <article class="card"><div class="icon">👤</div><h3>完成訂單</h3><p>依照顧客要求收齊食材，食材收齊後會自動提交訂單。</p></article>
+    <article class="card"><div class="icon">🪙</div><h3>升級技能</h3><p>用賺到的金幣升級技能，最高 Lv.7，並在第二章解鎖更多食材。</p></article>
+  </div>
+</section>
+
+
+</main>
+<footer>© 2026 你的拉麵店 · 官方網站</footer>
+</body>
+</html>

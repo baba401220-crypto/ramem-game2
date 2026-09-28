@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你的拉麵店</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#fff8ef;color:#2b2118}
+.wrap{max-width:900px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.back{color:inherit;text-decoration:none;font-weight:800}
+.panel{background:#fff;border:1px solid #eadfd2;border-radius:18px;padding:15px;margin-top:12px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:#fff0dc;padding:9px 13px;border-radius:11px;font-weight:800}
+#field{height:430px;position:relative;overflow:hidden;background:linear-gradient(#f2f6f7,#dfe8ea);border-radius:18px;border:1px solid #d9e0e2;margin-top:12px}
+#field.chapter2{background:linear-gradient(#f9dede,#f4c8c8)}
+.food{position:absolute;top:-50px;background:none;border:0;font-size:36px;cursor:pointer;padding:4px;touch-action:manipulation}
+.bowl{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:65px;pointer-events:none}
+.order{display:flex;gap:8px;flex-wrap:wrap}
+.tag{padding:6px 9px;background:#f7f2ec;border-radius:9px}
+.done{text-decoration:line-through;opacity:.45}
+button{min-height:44px;border:1px solid #d9c9b8;border-radius:12px;background:#fff;padding:9px 14px;font-weight:800;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:#e87535;color:#fff;border-color:#e87535}
+#skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.skill{border:1px solid #eadfd2;border-radius:14px;padding:12px}
+.small{font-size:13px;color:#76695e}
+.msg{min-height:25px;font-weight:800;text-align:center;margin:8px}
+.savebox{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.warning{margin-top:10px;color:#8a4b00;font-size:13px;font-weight:700}
+.chapter{font-weight:900}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">← 回首頁</a>
+    <h2>🍜 你的拉麵店</h2>
+  </div>
+
+  <div class="panel">
+    <div class="stats">
+      <span class="stat">🪙 金幣：<b id="coins">25</b></span>
+      <span class="stat">🍜 完成：<b id="served">0</b></span>
+      <span class="stat">⭐ 等級：<b id="level">1</b>/7</span>
+      <span class="stat">📖 <b id="chapter">第一章</b></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <b>👤 顧客訂單</b>
+    <div id="order" class="order" style="margin-top:8px"></div>
+  </div>
+
+  <div id="field"><div class="bowl">🍜</div></div>
+  <div class="msg" id="msg" aria-live="polite">點擊掉落的食材來收集！訂單完成後會自動提交。</div>
+
+  <div class="panel">
+    <button class="primary" id="new">🔄 換單</button>
+    <button id="leave">🚪 離開遊戲</button>
+  </div>
+
+  <div class="panel">
+    <h3>🛒 技能商店</h3>
+    <div id="skills"></div>
+  </div>
+
+  <div class="panel">
+    <h3>💾 遊戲存檔</h3>
+    <div class="savebox">
+      <button class="primary" id="save">保存遊戲</button>
+      <button id="load">讀取存檔</button>
+      <button id="clearSave">刪除存檔</button>
+    </div>
+    <div id="saveStatus" class="small" style="margin-top:8px">尚未讀取存檔。</div>
+    <div class="warning">⚠️ 注意：如果你清除瀏覽器的網站資料，遊戲存檔可能會被刪除。</div>
+  </div>
+</div>
+
+<script>
+const F={
+  noodles:["🍜","麵條"],egg:["🥚","雞蛋"],pork:["🥩","叉燒"],
+  corn:["🌽","玉米"],green:["🥬","青菜"],fish:["🍥","魚板"],mushroom:["🍄","香菇"],
+  sushi:["🍣","壽司"],burger:["🍔","漢堡"],fries:["🍟","薯條"],cola:["🥤","可樂"]
+};
+
+const chapter1=["noodles","egg","pork","corn","green","fish","mushroom"];
+const chapter2=["noodles","egg","pork","corn","green","fish","mushroom","sushi","burger","fries","cola"];
+
+let s={
+  coins:25,served:0,level:1,chapter:1,order:{},bag:{},
+  speed:0,magnet:0,bonus:0
+};
+let interval;
+let gameRunning=true;
+
+function activeKeys(){
+  return s.chapter>=2 ? chapter2 : chapter1;
+}
+
+function order(){
+  s.order={}; s.bag={};
+  const keys=activeKeys().slice().sort(()=>Math.random()-.5);
+  const count=2+Math.floor(Math.random()*2);
+  keys.slice(0,count).forEach(k=>s.order[k]=1);
+  render();
+}
+
+function maybeLevelUp(){
+  const newLevel=Math.min(7,1+Math.floor(s.served/3));
+  if(newLevel>s.level){
+    const old=s.level;
+    s.level=newLevel;
+    if(old<3 && s.level>=3){
+      s.chapter=2;
+      document.querySelector("#msg").textContent="🎉 第一章完成！第二章開啟：壽司、漢堡、薯條、可樂加入！";
+    }else if(s.level>=7){
+      document.querySelector("#msg").textContent="🏆 已達到最高等級 Lv.7！你的拉麵店經營成功！";
+    }else{
+      document.querySelector("#msg").textContent="⬆️ 升級了！現在是 Lv."+s.level+"！";
+    }
+  }
+}
+
+function render(){
+  document.querySelector("#coins").textContent=s.coins;
+  document.querySelector("#served").textContent=s.served;
+  document.querySelector("#level").textContent=s.level;
+  document.querySelector("#chapter").textContent=s.chapter>=2?"第二章":"第一章";
+
+  const field=document.querySelector("#field");
+  field.classList.toggle("chapter2",s.chapter>=2);
+
+  const o=document.querySelector("#order");
+  o.innerHTML="";
+  Object.keys(s.order).forEach(k=>{
+    const d=document.createElement("span");
+    d.className="tag "+((s.bag[k]||0)>=1?"done":"");
+    d.textContent=F[k][0]+" "+F[k][1]+" "+Math.min(s.bag[k]||0,1)+"/1";
+    o.appendChild(d);
+  });
+
+  const sk=document.querySelector("#skills");
+  sk.innerHTML="";
+  [
+    ["speed","⚡ 掉落速度",25],
+    ["magnet","🧲 收集範圍",35],
+    ["bonus","🪙 金幣加成",50]
+  ].forEach(x=>{
+    const d=document.createElement("div");
+    d.className="skill";
+    const lv=s[x[0]], cost=x[2]*(lv+1);
+    d.innerHTML="<b>"+x[1]+" Lv."+lv+"</b><div class='small'>升級需要 🪙 "+cost+"</div>";
+    const b=document.createElement("button");
+    b.textContent="升級";
+    b.disabled=lv>=7 || s.coins<cost;
+    b.onclick=()=>{
+      if(lv>=7 || s.coins<cost)return;
+      s.coins-=cost; s[x[0]]++;
+      saveGame(true);
+      render(); restart();
+    };
+    d.appendChild(b);
+    sk.appendChild(d);
+  });
+}
+
+function autoServe(){
+  if(Object.keys(s.order).length &&
+     Object.keys(s.order).every(k=>(s.bag[k]||0)>=1)){
+    const gain=20+s.bonus*5+s.level*2;
+    s.coins+=gain;
+    s.served++;
+    maybeLevelUp();
+    saveGame(true);
+    if(s.level<3 || !document.querySelector("#msg").textContent.includes("第二章")){
+      document.querySelector("#msg").textContent="🍜 完成！自動提交成功，獲得 🪙 "+gain;
+    }
+    order();
+  }
+}
+
+function spawn(){
+  if(!gameRunning)return;
+  const keys=activeKeys();
+  const k=keys[Math.floor(Math.random()*keys.length)];
+  const e=document.createElement("button");
+  e.className="food";
+  e.textContent=F[k][0];
+  e.style.left=(4+Math.random()*90)+"%";
+  document.querySelector("#field").appendChild(e);
+
+  let y=-50,dead=false,last=performance.now();
+  const v=1.2+s.speed*.25+Math.random()*.8+(s.level-1)*.08;
+
+  function a(t){
+    if(dead)return;
+    y+=v*(t-last)/16; last=t;
+    e.style.top=y+"px";
+    if(y<400)requestAnimationFrame(a);
+    else{dead=true;e.remove();}
+  }
+  requestAnimationFrame(a);
+
+  e.onclick=()=>{
+    if(dead)return;
+    dead=true;
+    s.bag[k]=(s.bag[k]||0)+1;
+    e.remove();
+    render();
+    document.querySelector("#msg").textContent="收集到 "+F[k][1]+"！";
+    autoServe();
+  };
+}
+
+function restart(){
+  clearInterval(interval);
+  interval=setInterval(spawn,Math.max(300,900-s.speed*90-s.level*25));
+}
+
+function saveGame(silent=false){
+  localStorage.setItem("your_ramen_shop_save",JSON.stringify(s));
+  document.querySelector("#saveStatus").textContent="✅ 存檔完成："+new Date().toLocaleString();
+  if(!silent)document.querySelector("#msg").textContent="💾 遊戲已保存！";
+}
+
+function loadGame(){
+  const raw=localStorage.getItem("your_ramen_shop_save");
+  if(!raw){
+    document.querySelector("#saveStatus").textContent="目前沒有找到存檔。";
+    document.querySelector("#msg").textContent="目前沒有可讀取的存檔。";
+    return;
+  }
+  try{
+    const data=JSON.parse(raw);
+    s={...s,...data};
+    gameRunning=true;
+    document.querySelector("#saveStatus").textContent="✅ 已讀取存檔。";
+    order(); render(); restart();
+    document.querySelector("#msg").textContent="📂 存檔已讀取！繼續經營你的拉麵店吧！";
+  }catch(e){
+    document.querySelector("#saveStatus").textContent="存檔讀取失敗。";
+  }
+}
+
+function clearSave(){
+  if(confirm("確定要刪除目前的遊戲存檔嗎？")){
+    localStorage.removeItem("your_ramen_shop_save");
+    document.querySelector("#saveStatus").textContent="已刪除存檔。";
+    document.querySelector("#msg").textContent="存檔已刪除。";
+  }
+}
+
+document.querySelector("#new").onclick=()=>{
+  order();
+  document.querySelector("#msg").textContent="新的客人來了！";
+};
+
+document.querySelector("#save").onclick=()=>saveGame(false);
+document.querySelector("#load").onclick=loadGame;
+document.querySelector("#clearSave").onclick=clearSave;
+
+document.querySelector("#leave").onclick=()=>{
+  const choice=confirm("要保存遊戲嗎？\n\n按「確定」＝保存\n按「取消」＝不保存");
+  if(choice)saveGame(true);
+  gameRunning=false;
+  clearInterval(interval);
+  document.querySelector("#msg").textContent=choice
+    ?"💾 已保存。你可以安全離開遊戲。"
+    :"你選擇不保存。這次遊戲進度不會被保存。";
+};
+
+/* 瀏覽器關閉時只能盡力保存，瀏覽器不允許可靠地自訂離開提示。 */
+window.addEventListener("beforeunload",()=>{
+  try{localStorage.setItem("your_ramen_shop_save",JSON.stringify(s));}catch(e){}
+});
+
+order();
+render();
+restart();
+for(let i=0;i<4;i++)setTimeout(spawn,i*250);
+
+const hasSave=localStorage.getItem("your_ramen_shop_save");
+if(hasSave){
+  document.querySelector("#saveStatus").textContent="💾 找到已有存檔，可按「讀取存檔」繼續。";
+}
+</script>
+</body>
+</html>
